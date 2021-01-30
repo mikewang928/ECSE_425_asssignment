@@ -12,7 +12,7 @@ port (clk : in std_logic;
 end comments_fsm;
 
 architecture behavioral of comments_fsm is
-type Sreg0_type is (S1,S2,S3,S4);
+type Sreg0_type is (S1,S2,S3,S4,S5);
 signal Sreg0:Sreg0_type;
 -- The ASCII value for the '/', '*' and end-of-line characters
 constant SLASH_CHARACTER : std_logic_vector(7 downto 0) := "00101111";
@@ -44,10 +44,12 @@ begin
 					Sreg0 <= S4;
 				elsif input = STAR_CHARACTER then 
 					Sreg0 <= S3;
+				else 
+					Sreg0 <= S1;
 				end if; 
 			When S3 => 
-				if input = SLASH_CHARACTER then 
-					Sreg0 <= S1; 
+				if input = STAR_CHARACTER then 
+					Sreg0 <= S5; 
 				else 
 					Sreg0 <= S3; 
 				end if; 
@@ -57,6 +59,12 @@ begin
 				else 
 					Sreg0 <= S4; 
 				end if;
+			when S5 => 
+				if input = SLASH_CHARACTER then 
+					Sreg0 <= S1;
+				else 
+					Sreg0 <= S3;
+				end if; 
 			when others => 
 			 null;
 		end case;
