@@ -64,8 +64,8 @@ BEGIN
 	
 
 	-- We changed the order (first assert then wai for 1 clk)
+	
 	REPORT "Case 1, reading: '/is//comment// /*is*/ \n end' ";
-   
 	s_input <= SLASH_CHARACTER;
 	ASSERT (s_output = '0') REPORT "Case 1: the output should be '0' SLASH_CHARACTER1" SEVERITY ERROR;
 	WAIT FOR 1 * clk_period;
@@ -155,8 +155,10 @@ BEGIN
 	WAIT FOR 1*clk_period;
 	s_reset <='0';
 	WAIT FOR 1*clk_period;
-
-
+	
+	
+	
+	
 	
 	
 	
@@ -260,9 +262,8 @@ BEGIN
 	s_reset <='0';
 	WAIT FOR 1*clk_period;
 	
+	
 
-	
-	
 	
 	
 	

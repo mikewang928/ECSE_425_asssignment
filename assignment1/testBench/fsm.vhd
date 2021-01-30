@@ -74,9 +74,8 @@ end if;
 end process;
 -- signal assignment statement for the outputs 
 output_assignment:
-output <= '0' when (Sreg0 = S1 and input /= SLASH_CHARACTER) else 
-			 '0' when (Sreg0 = S1 and input = SLASH_CHARACTER) else 
-			 '0' when (Sreg0 = S2 and (input = STAR_CHARACTER or input = SLASH_CHARACTER)) else 
+output <= '0' when (Sreg0 = S1) else 
+			 '0' when (Sreg0 = S2) else 
 			 '1'; 
 
 end behavioral;
