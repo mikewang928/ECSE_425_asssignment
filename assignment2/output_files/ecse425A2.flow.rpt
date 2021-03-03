@@ -1,5 +1,5 @@
 Flow report for ecse425A2
-Fri Feb 26 19:48:14 2021
+Wed Mar 03 22:21:27 2021
 Quartus Prime Version 18.0.0 Build 614 04/24/2018 SJ Lite Edition
 
 
@@ -40,7 +40,7 @@ refer to the applicable agreement for further details.
 +---------------------------------------------------------------------------+
 ; Flow Summary                                                              ;
 +-----------------------------+---------------------------------------------+
-; Flow Status                 ; Flow Failed - Fri Feb 26 19:48:14 2021      ;
+; Flow Status                 ; Flow Failed - Wed Mar 03 22:21:27 2021      ;
 ; Quartus Prime Version       ; 18.0.0 Build 614 04/24/2018 SJ Lite Edition ;
 ; Revision Name               ; ecse425A2                                   ;
 ; Top-level Entity Name       ; ecse425A2                                   ;
@@ -62,7 +62,7 @@ refer to the applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 02/26/2021 19:47:57 ;
+; Start date & time ; 03/03/2021 22:21:15 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; ecse425A2           ;
 +-------------------+---------------------+
@@ -73,7 +73,7 @@ refer to the applicable agreement for further details.
 +-------------------------------------+----------------------------------------+---------------+-------------+----------------+
 ; Assignment Name                     ; Value                                  ; Default Value ; Entity Name ; Section Id     ;
 +-------------------------------------+----------------------------------------+---------------+-------------+----------------+
-; COMPILER_SIGNATURE_ID               ; 1095523195590.161434007628268          ; --            ; --          ; --             ;
+; COMPILER_SIGNATURE_ID               ; 1095523195590.161478127454900          ; --            ; --          ; --             ;
 ; EDA_OUTPUT_DATA_FORMAT              ; Vhdl                                   ; --            ; --          ; eda_simulation ;
 ; EDA_SIMULATION_TOOL                 ; ModelSim-Altera (VHDL)                 ; <None>        ; --          ; --             ;
 ; EDA_TIME_SCALE                      ; 1 ps                                   ; --            ; --          ; eda_simulation ;
@@ -91,8 +91,8 @@ refer to the applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:00:18     ; 1.0                     ; 4774 MB             ; 00:00:21                           ;
-; Total                ; 00:00:18     ; --                      ; --                  ; 00:00:21                           ;
+; Analysis & Synthesis ; 00:00:13     ; 1.0                     ; 4774 MB             ; 00:00:21                           ;
+; Total                ; 00:00:13     ; --                      ; --                  ; 00:00:21                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
