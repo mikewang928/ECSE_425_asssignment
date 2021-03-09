@@ -9,158 +9,159 @@ z2
 cModel Technology
 Z0 dD:/study/mcgill/u3/ECSE425/assignment2
 Ecache
-Z1 w1614787942
-Z2 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
-Z3 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
-Z4 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+w1615294035
+Z1 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z3 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
 R0
-Z5 8cache.vhd
-Z6 Fcache.vhd
+Z4 8cache.vhd
+Z5 Fcache.vhd
 l0
-L5
-V_2c<DMegBT0W4kTcbznDM3
-!s100 C<;HKM7M38>>4jE0Q0h@Q2
-Z7 OV;C;10.5b;63
+L6
+VVXfPjWGD9ioCUhg0UXB>20
+!s100 UHaiS16bbQo3aXQ35jLT?2
+Z6 OV;C;10.5b;63
 32
-Z8 !s110 1614787997
+!s110 1615294039
 !i10b 1
-Z9 !s108 1614787997.000000
-Z10 !s90 -reportprogress|300|cache.vhd|
-Z11 !s107 cache.vhd|
+!s108 1615294039.000000
+Z7 !s90 -reportprogress|300|cache.vhd|
+!s107 cache.vhd|
 !i113 1
-Z12 tExplicit 1 CvgOpt 0
+Z8 tExplicit 1 CvgOpt 0
 Aarch
+R1
 R2
 R3
-R4
-DEx4 work 5 cache 0 22 _2c<DMegBT0W4kTcbznDM3
-l54
-L30
-V5=W>63^_@@bY2;H>BZeK=1
-!s100 e]6ZEGj>VY8b93hEdW2T`2
-R7
+DEx4 work 5 cache 0 22 VXfPjWGD9ioCUhg0UXB>20
+l47
+L33
+VjQe0fckPG1R4KE5f]3Bea2
+!s100 zX3TE16aY;X^]b:ZKbGhi2
+R6
 32
-R8
+Z9 !s110 1615293878
 !i10b 1
-R9
-R10
-R11
+Z10 !s108 1615293878.000000
+R7
+!s107 cache.vhd|
 !i113 1
-R12
+R8
+w1615293868
 Ecache_tb
-Z13 w1614787993
+Z11 w1615268417
+R1
 R2
 R3
-R4
 R0
-Z14 8cache_tb.vhd
-Z15 Fcache_tb.vhd
+Z12 8cache_tb.vhd
+Z13 Fcache_tb.vhd
 l0
 L5
 Vi]X^50aNb6mMEU7GdLLX93
 !s100 N8hTJD?ado=UI;TQE4:Ql3
-R7
+R6
 32
-Z16 !s110 1614787998
+R9
 !i10b 1
-Z17 !s108 1614787998.000000
-Z18 !s90 -reportprogress|300|cache_tb.vhd|
-Z19 !s107 cache_tb.vhd|
+R10
+Z14 !s90 -reportprogress|300|cache_tb.vhd|
+Z15 !s107 cache_tb.vhd|
 !i113 1
-R12
+R8
 Abehavior
+R1
 R2
 R3
-R4
 DEx4 work 8 cache_tb 0 22 i]X^50aNb6mMEU7GdLLX93
 l71
 L8
-V9M4@lXa6=CPHjhdz>YY:g2
-!s100 l]Cc`4>L^X:;EK`OM?BUB0
-R7
+VKP7<emX<O2PfeiA`BhG]92
+!s100 9c98L0K32jez2:z1XCR0k0
+R6
 32
-R16
+R9
 !i10b 1
-R17
-R18
-R19
+R10
+R14
+R15
 !i113 1
-R12
+R8
 Ememory
-Z20 w1614258526
+Z16 w1614258526
+R1
 R2
 R3
-R4
 R0
-Z21 8memory.vhd
-Z22 Fmemory.vhd
+Z17 8memory.vhd
+Z18 Fmemory.vhd
 l0
 L7
 VL3EiYkBzVP4MhBeEnlWBI1
 !s100 j<M40]GTM>Az3BHXBF:==3
-R7
+R6
 32
-R8
-!i10b 1
 R9
-Z23 !s90 -reportprogress|300|memory.vhd|
-Z24 !s107 memory.vhd|
+!i10b 1
+R10
+Z19 !s90 -reportprogress|300|memory.vhd|
+Z20 !s107 memory.vhd|
 !i113 1
-R12
+R8
 Artl
+R1
 R2
 R3
-R4
 DEx4 work 6 memory 0 22 L3EiYkBzVP4MhBeEnlWBI1
 l33
 L25
 VkC7ihg<mo4G[^]^P9HE2R0
 !s100 z6ZdPjM`cm81fj>ZTb<EQ0
-R7
+R6
 32
-R8
-!i10b 1
 R9
-R23
-R24
+!i10b 1
+R10
+R19
+R20
 !i113 1
-R12
+R8
 Ememory_tb
-Z25 w1614330468
+Z21 w1614330468
+R1
 R2
 R3
-R4
 R0
-Z26 8memory_tb.vhd
-Z27 Fmemory_tb.vhd
+Z22 8memory_tb.vhd
+Z23 Fmemory_tb.vhd
 l0
 L5
 V:gamI`Z?1_z;8ed=KM?Nm2
 !s100 K:h_7;_e46:2;TAj@4dAB3
-R7
+R6
 32
-R16
+R9
 !i10b 1
-R17
-Z28 !s90 -reportprogress|300|memory_tb.vhd|
-Z29 !s107 memory_tb.vhd|
+R10
+Z24 !s90 -reportprogress|300|memory_tb.vhd|
+Z25 !s107 memory_tb.vhd|
 !i113 1
-R12
+R8
 Abehaviour
+R1
 R2
 R3
-R4
-Z30 DEx4 work 9 memory_tb 0 22 :gamI`Z?1_z;8ed=KM?Nm2
+DEx4 work 9 memory_tb 0 22 :gamI`Z?1_z;8ed=KM?Nm2
 l38
 L8
-Z31 VEf`@Bc;5o3Sdac<WAO<S]2
-Z32 !s100 JkPREAghZ_1QYmfCLTTi<2
-R7
+VEf`@Bc;5o3Sdac<WAO<S]2
+!s100 JkPREAghZ_1QYmfCLTTi<2
+R6
 32
-R16
+R9
 !i10b 1
-R17
-R28
-R29
+R10
+R24
+R25
 !i113 1
-R12
+R8
