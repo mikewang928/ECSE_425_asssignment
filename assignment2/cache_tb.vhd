@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 entity cache_tb is
 end cache_tb;
 
-architecture behavior of cache_tb is
+arcTag_Matchecture behavior of cache_tb is
 
 component cache is
 	generic(
@@ -118,30 +118,33 @@ begin
 -- put your tests here
 	-- Table of Contents for Test Cases:
 	--------------------------------------------
-	--    1.  Read  -  Clean,  Hit,   Valid
-	--    2.  Read  -  Clean,  Hit,   Invalid (Impossible Case)
-	--    3.  Read  -  Clean,  Miss,  Valid 
-	--    4.  Read  -  Clean,  Miss,  Invalid
-	--    5.  Read  -  Dirty,  Hit,   Valid
-	--    6.  Read  -  Dirty,  Hit,   Invalid (Impossible Case)
-	--    7.  Read  -  Dirty,  Miss,  Valid
-	--    8.  Read  -  Dirty,  Miss,  Invalid (Impossible Case)
-	--    9.  Write -  Clean,  Hit,   Valid
-	--    10. Write -  Clean,  Hit,   Invalid (Impossible Case)
-	--    11. Write -  Clean,  Miss,  Valid
-	--    12. Write -  Clean,  Miss,  Invalid
-	--    13. Write -  Dirty,  Hit,   Valid
-	--    14. Write -  Dirty,  Hit,   Invalid (Impossible Case)
-	--    15. Write -  Dirty,  Miss,  Valid
-	--    16. Write -  Dirty,  Miss,  Invalid (Impossible Case)
+	--    1.  Read  -  Clean,  Tag_Match,   		Valid
+	--    2.  Read  -  Clean,  Tag_Match,   		Invalid 
+	--    3.  Read  -  Clean,  Tag_Not_Match,  	Valid 
+	--    4.  Read  -  Clean,  Tag_Not_Match,  	Invalid 
+	--    5.  Read  -  Dirty,  Tag_Match,   		Valid
+	--    6.  Read  -  Dirty,  Tag_Match,   		Invalid (Impossible Case)
+	--    7.  Read  -  Dirty,  Tag_Not_Match,  	Valid
+	--    8.  Read  -  Dirty,  Tag_Not_Match,  	Invalid (Impossible Case)
+	--    9.  Write -  Clean,  Tag_Match,   		Valid
+	--    10. Write -  Clean,  Tag_Match,   		Invalid 
+	--    11. Write -  Clean,  Tag_Not_Match,  	Valid
+	--    12. Write -  Clean,  Tag_Not_Match,  	Invalid 
+	--    13. Write -  Dirty,  Tag_Match,   		Valid
+	--    14. Write -  Dirty,  Tag_Match,   		Invalid (Impossible Case)
+	--    15. Write -  Dirty,  Tag_Not_Match,  	Valid
+	--    16. Write -  Dirty,  Tag_Not_Match,  	Invalid (Impossible Case)
 	--------------------------------------------
+	
+	
+	
 	
 
 	-- cache_blocks: 154 valid, 153 dirty, 152-134 useless, 133-128 tag, 127-0 data field in the block
 	-- s_addr: 31-15 useless, 14-9 tag, 8-4 block index,3-2 word offset,1-0 byte offset		
-	-- 1.  Read  -  Clean,  Hit,   Valid
+	-- 1.  Read  -  Clean,  Tag_Match,   Valid
 	-- offset = 0000; block_index = 111110; tag = 0000000000000000000011
-	-- REPORT "1.  Read  -  Clean,  Hit,   Valid";
+	-- REPORT "1.  Read  -  Clean,  Tag_Match,   Valid";
 	s_addr <= "00000000000000000000111111100000";
 	-- report "s_addr: "&integer'image(to_integer(unsigned(s_addr)));
 	-- first make it valid
@@ -163,16 +166,33 @@ begin
 	--reset <='0';
 	WAIT FOR 10*clk_period;
 	
-	-- 3.  Read  -  Clean,  Miss,  Valid
+	
+	
+-- --2.  Read  -  Clean,  Tag_Match,   		Invalid 
+	-- offset = 0000; block_index = 000000; tag = 0000000000000000000000
+	s_addr <= "00000000000000000000000000000001";
+	s_read <= '1';
+	s_write <= '0';
+	wait for 10*clk_period;
+	assert s_readdata = "00000000000000000000000000000001" report "################ Test 2 Not Passed! #####################" severity error;
+	s_read <= '0';                                                       
+	s_write <= '0'; 	
+	REPORT "_______________________";
+	--reset <= '1';
+	--reset <='0';
+	WAIT FOR 10*clk_period;
+	
+	
+	-- 3.  Read  -  Clean,  Tag_Not_Match,  Valid
 	-- offset = 0000; block_index = 111100; tag = 0000000000000000000011   
-	REPORT "3.  Read  -  Clean,  Miss,  Valid";	
+	REPORT "3.  Read  -  Clean,  Tag_Not_Match,  Valid";	
 	s_addr <= "00000000000000000000111111000000";	
 	-- first make it valid and clean
 	s_read <= '1';                                                       
 	s_write <= '0';
 	s_writedata <= x"000A000B";  	
 	wait for 10*clk_period;  
-	-- change index to make it miss but still clean and valid 
+	-- change index to make it Tag_Not_Match but still clean and valid 
 	-- offset = 0000; block_index = 111100; tag = 0000000000000000000010   
 	s_addr <= "00000000000000000000101111000000";
 	s_read <= '1';
@@ -184,9 +204,9 @@ begin
 	REPORT "_______________________";
 
 	
-	-- 4.  Read  -  Clean,  Miss,  Invalid
+	-- 4.  Read  -  Clean,  Tag_Not_Match,  Invalid
 	-- offset = 0000; block_index = 10000; tag = 0000000000000000000000001   
-	REPORT "4.  Read  -  Clean,  Miss,  Invalid";
+	REPORT "4.  Read  -  Clean,  Tag_Not_Match,  Invalid";
 	s_addr <= "00000000000000000000001100000000";	
 	s_read <= '1';                                                       
 	s_write <= '0';                                                      
@@ -198,9 +218,9 @@ begin
 	REPORT "_______________________";
 
 	
-	-- 5.  Read  -  Dirty,  Hit,   Valid
+	-- 5.  Read  -  Dirty,  Tag_Match,   Valid
 	-- offset = 0000; block_index = 111110; tag = 0000000000000000000011
-	REPORT "5.  Read  -  Dirty,  Hit,   Valid";
+	REPORT "5.  Read  -  Dirty,  Tag_Match,   Valid";
 	s_addr <= "00000000000000000000111111100000";                        
 	-- first make it dirty 
 	s_write <= '1'; 
@@ -217,9 +237,9 @@ begin
 	REPORT "_______________________";
 
 	
-	-- 7.  Read  -  Dirty,  Miss,  Valid
+	-- 7.  Read  -  Dirty,  Tag_Not_Match,  Valid
 	-- offset = 0000; block_index = 111110; tag = 0000000000000000000011
-	REPORT "7.  Read  -  Dirty,  Miss,  Valid";
+	REPORT "7.  Read  -  Dirty,  Tag_Not_Match,  Valid";
 	s_addr <= "00000000000000000000111111100000";  
 	-- first make it dirty
 	s_write <= '1'; 
@@ -239,8 +259,8 @@ begin
 	
 	
 	
-	-- 9.  Write -  Clean,  Hit,   Valid
-	REPORT "9.  Write -  Clean,  Hit,   Valid";	
+	-- 9.  Write -  Clean,  Tag_Match,   Valid
+	REPORT "9.  Write -  Clean,  Tag_Match,   Valid";	
 	-- offset = 0100; block_index = 000001; tag = 0000000000000000000001
 	s_addr <= "00000000000000000000010000010100";
 	-- first make it valid
@@ -262,11 +282,32 @@ begin
 	REPORT "_______________________";
 
 	
+	-- 10. Write -  Clean,  Tag_Match,  Invalid 
+	REPORT "10. Write -  Clean,  Tag_Match,  Invalid";
+	-- offset = 0100; block_index = 000101; tag = 0000000000000000000001
+	s_addr <= "00000000000000000000010001010100";
+	-- report "s_addr: "&integer'image(to_integer(unsigned(s_addr)));
+	-- first make it valid
+	s_write <= '1'; 
+	s_read <= '0';
+	s_writedata <= x"000A000A";
+	wait for 10*clk_period;
+	s_read <= '1';                                                       
+	s_write <= '0';                                                      
+	wait for 10*clk_period;
+	assert s_readdata = x"000A000A" report "################ Test 10 Not Passed! #####################" severity error;
+	s_read <= '0';                                                       
+	s_write <= '0'; 
+--	wait for clk_period;
+--	-- reset <= '1';
+--	wait for clk_period;
+	REPORT "_______________________";
+	--reset <= '1';
+	--reset <='0';
+	WAIT FOR 10*clk_period;
 	
-	
-	
-	-- 11. Write -  Clean,  Miss,  Valid
-	REPORT "11. Write -  Clean,  Miss,  Valid";
+	-- 11. Write -  Clean,  Tag_Not_Match,  Valid
+	REPORT "11. Write -  Clean,  Tag_Not_Match,  Valid";
 	-- offset = 0100; block_index = 010001; tag = 0000000000000000000001
 	s_addr <= "00000000000000000000010100010100";	
 	-- first make it valid
@@ -274,7 +315,7 @@ begin
 	s_read <= '0';
 	s_writedata <= x"000B000B";
 	wait until rising_edge(s_waitrequest); 
-	-- write on clean and miss
+	-- write on clean and Tag_Not_Match
 	-- offset = 0100; block_index = 010001; tag = 0000000000000000000011
 	s_addr <= "00000000000000000000110100010100";
 	s_write <= '1';
@@ -293,9 +334,9 @@ begin
 	
 	
 	
-	-- 12. Write -  Clean,  Miss,  Invalid
-	-- write on clean, miss and invalid
-	REPORT "12. Write -  Clean,  Miss,  Invalid";
+	-- 12. Write -  Clean,  Tag_Not_Match,  Invalid
+	-- write on clean, Tag_Not_Match and invalid
+	REPORT "12. Write -  Clean,  Tag_Not_Match,  Invalid";
 	-- offset = 0100; block_index = 011001; tag = 0000000000000000000011
 	s_addr <= "00000000000000000000110110010100";
 	s_write <= '1';
@@ -313,9 +354,9 @@ begin
 	
 	
 	
-	-- 13. Write -  Dirty,  Hit,   Valid
-	-- write on dirty, hit and valid
-	REPORT "13. Write -  Dirty,  Hit,   Valid";
+	-- 13. Write -  Dirty,  Tag_Match,   Valid
+	-- write on dirty, Tag_Match and valid
+	REPORT "13. Write -  Dirty,  Tag_Match,   Valid";
 	-- offset = 0100; block_index = 011001; tag = 0000000000000000000011
 	s_addr <= "00000000000000000000110110010100";
 	s_write <= '1';
@@ -336,8 +377,8 @@ begin
 
 	
 	
-	-- 15. Write -  Dirty,  Miss,  Valid
-	REPORT "15. Write -  Dirty,  Miss,  Valid";
+	-- 15. Write -  Dirty,  Tag_Not_Match,  Valid
+	REPORT "15. Write -  Dirty,  Tag_Not_Match,  Valid";
 	-- offset = 0100; block_index = 011001; tag = 0000000000000000000011
 	s_addr <= "00000000000000000000110110010100";
 	s_write <= '1';
