@@ -1,0 +1,7 @@
+*/work/
+*.sublime-project
+*.sublime-workspace
+.idea
+*.bin
+*.wlf
+*.zip
