@@ -11,10 +11,13 @@ entity PC is
   ) ;
 end entity ; -- PC
 
+
 architecture arch of PC is
 signal temp : std_logic_vector(31 downto 0);
 begin
 
+-- if reset all pc to 0
+-- if at rising_edge of the clock and enable = 1, push the pc_in to pc_out
 program_counter : process( clock )
 begin
 
