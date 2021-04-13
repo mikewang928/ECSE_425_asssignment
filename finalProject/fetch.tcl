@@ -3,9 +3,13 @@ proc AddWaves {} {
     add wave -position end sim:/fetch_tb/fetch_out
 	add wave -position end sim:/fetch_tb/dut/pc
 	add wave -position end sim:/fetch_tb/dut/next_pc
-	add wave -position end sim:/fetch_tb/dut/adder_out
-	add wave -position end sim:/fetch_tb/dut/s_waitrequest
-	add wave -position end sim:/fetch_tb/dut/pc_stall
+	add wave -position end sim:/fetch_tb/pc_out
+	add wave -position end sim:/fetch_tb/pc_in
+	add wave -position end sim:/fetch_tb/pc_src
+	add wave -position end sim:/fetch_tb/pc_stall
+	add wave -position end sim:/fetch_tb/reset
+	add wave -position end sim:/fetch_tb/dut/i_mem/address
+	add wave -position end sim:/fetch_tb/dut/i_mem/readdata
 }
 
 vlib work
