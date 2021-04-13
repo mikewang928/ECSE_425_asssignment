@@ -2,11 +2,14 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 USE ieee.numeric_std.all;
 
+-- need to add forwarding, hazard detection, and stall signal
+
 ENTITY decode IS
 	PORT (
 		clk : in std_logic;
 		instruction : in std_logic_vector(31 downto 0);  -- fetched instruction
 		wb_data : in std_logic_vector(31 downto 0);  -- data to write back to register
+		wb_reg : in std_logic_vector(4 downto 0);  -- the register to write back to
 		pc_in : in integer;  -- incremented pc from fetch stage
 		
 		pc_out : out integer;  -- pc bypass output
@@ -23,6 +26,7 @@ ENTITY decode IS
 		reg_dst : out std_logic;  -- selecting whether rt (0) or rd (1) is the destination register
 		
 		-- M stage control signals
+		jump : out std_logic;  -- whether instruction is jump (1) or no jump (0)
 		branch : out std_logic;  -- whether instruction is branch (1) or not branch (0)
 		mem_write : out std_logic;  -- whether write to memory is needed (1) or not (0)
 		mem_read : out std_logic;  -- whether read from memory is needed (1) or not (0)
@@ -73,6 +77,8 @@ BEGIN
 				mem_write <= '0';
 				reg_write <= '1';
 				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '0';
 				case funct is
 					when "100000" =>  
 						alu_op <= 0; -- add
@@ -80,8 +86,10 @@ BEGIN
 						alu_op <= 1; -- sub
 					when "011000" =>  
 						alu_op <= 3; -- mult
+						reg_write <= '0';  -- writes to HI and LO
 					when "011010" =>  
 						alu_op <= 4; -- div
+						reg_write <= '0';  -- writes to HI and LO
 					when "101010" =>  
 						alu_op <= 5; -- slt
 					when "100100" =>  
@@ -105,6 +113,7 @@ BEGIN
 					when "001000" =>  
 						alu_op <= 25; -- jr
 						reg_write <= '0';
+						jump <= '1';
 				end case;
 			-- I type instructions
 			when "001000" =>
@@ -115,7 +124,9 @@ BEGIN
 				mem_read <= '0';
 				mem_write <= '0';
 				reg_write <= '1';
-				mem_to_reg <= '0';
+				mem_to_reg <= '0';				
+				branch <= '0';
+				jump <= '0';
 			when "001010" =>
 				alu_op <= 6; -- slti
 				ext32 <= std_logic_vector(resize(signed(immediate), ext32'length));
@@ -125,6 +136,8 @@ BEGIN
 				mem_write <= '0';
 				reg_write <= '1';
 				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '0';
 			when "001100" =>
 				alu_op <= 11; -- andi
 				ext32 <= x"0000" & immediate;
@@ -134,6 +147,8 @@ BEGIN
 				mem_write <= '0';
 				reg_write <= '1';
 				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '0';
 			when "001101" =>
 				alu_op <= 12; -- ori
 				ext32 <= x"0000" & immediate;
@@ -143,6 +158,8 @@ BEGIN
 				mem_write <= '0';
 				reg_write <= '1';
 				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '0';
 			when "001110" =>
 				alu_op <= 13; -- xori
 				ext32 <= x"0000" & immediate;
@@ -152,6 +169,8 @@ BEGIN
 				mem_write <= '0';
 				reg_write <= '1';
 				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '0';
 			when "001111" =>
 				alu_op <= 16; -- lui
 				ext32 <= x"0000" & immediate;
@@ -161,6 +180,8 @@ BEGIN
 				mem_write <= '0';
 				reg_write <= '1';
 				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '0';
 			when "100011" =>
 				alu_op <= 20; -- lw
 				ext32 <= std_logic_vector(resize(signed(immediate), ext32'length));
@@ -170,6 +191,8 @@ BEGIN
 				mem_write <= '0';
 				reg_write <= '1';
 				mem_to_reg <= '1';
+				branch <= '0';
+				jump <= '0';
 			when "101011" =>
 				alu_op <= 21; -- sw
 				ext32 <= std_logic_vector(resize(signed(immediate), ext32'length));
@@ -178,34 +201,53 @@ BEGIN
 				mem_write <= '1';
 				reg_write <= '0';
 				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '0';
 			when "000100" =>
 				alu_op <= 22; -- beq
 				ext32 <= std_logic_vector(resize(signed(immediate), ext32'length));
 				alu_src <= '0';
-				branch <= '1';
 				mem_read <= '0';
 				mem_write <= '0';
 				reg_write <= '0';
 				mem_to_reg <= '0';
+				branch <= '1';
+				jump <= '0';
 			when "000101" =>
 				alu_op <= 23; -- bne
 				ext32 <= std_logic_vector(resize(signed(immediate), ext32'length));
 				alu_src <= '0';
-				branch <= '1';
 				mem_read <= '0';
 				mem_write <= '0';
 				reg_write <= '0';
 				mem_to_reg <= '0';
+				branch <= '1';
+				jump <= '0';
 			-- J type instruction
 			when "000010" =>
 				alu_op <= 24; -- j
+				mem_read <= '0';
+				mem_write <= '0';
+				reg_write <= '0';
+				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '1';
 			when "000011" =>
 				alu_op <= 26; -- jal
+				mem_read <= '0';
+				mem_write <= '0';
+				reg_write <= '1';
+				mem_to_reg <= '0';
+				branch <= '0';
+				jump <= '1';
 				
 			end case;
 				
-		elsif falling_edge(clk) then
-	
+		elsif falling_edge(clk) then  -- write back to register
+			if(reg_write = '1') then
+				-- R0 is always 0
+				register_bank(to_integer(unsigned(wb_reg))) <= x"00000000" when (wb_reg = "00000") else wb_data;
+			end if;
 		end if;
 	end process;
 
