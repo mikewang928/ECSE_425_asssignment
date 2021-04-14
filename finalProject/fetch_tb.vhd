@@ -14,7 +14,8 @@ ARCHITECTURE behaviour OF fetch_tb IS
 			fetch_out : out std_logic_vector(31 downto 0);
 			pc_out : out integer;
 			pc_in : in integer;
-			pc_select : in std_logic;
+			pc_src : in std_logic;  -- source of next_pc, pc+1 (0) or external pc (1)
+			pc_stall : in std_logic;  -- whether pc needs to be stalled (1) or not (0)
 			reset : in std_logic
 		);
     END COMPONENT;
@@ -25,9 +26,9 @@ ARCHITECTURE behaviour OF fetch_tb IS
 	signal fetch_out : std_logic_vector(31 downto 0) := (others=>'0');
 	signal pc_out : integer := 0;
 	signal pc_in : integer := 0;
-	signal pc_select : std_logic := '0';
+	signal pc_src : std_logic := '0';
+	signal pc_stall : std_logic := '0';
 	signal reset : std_logic := '0';
-
 
 BEGIN
 
@@ -38,7 +39,8 @@ BEGIN
 			fetch_out,
 			pc_out,
 			pc_in,
-			pc_select,
+			pc_src,
+			pc_stall,
 			reset
 		);
 
@@ -53,7 +55,10 @@ BEGIN
     test_process : process
     BEGIN
 
-        wait;
+        wait for 5*clk_period;
+		pc_stall <= '1';
+		
+		wait;
 
     END PROCESS;
 END;

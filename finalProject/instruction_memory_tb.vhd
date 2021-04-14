@@ -45,9 +45,9 @@ BEGIN
 
     clk_process : process
     BEGIN
-        clk <= '0';
-        wait for clk_period/2;
         clk <= '1';
+        wait for clk_period/2;
+        clk <= '0';
         wait for clk_period/2;
     end process;
 
@@ -55,13 +55,13 @@ BEGIN
     BEGIN
 		address <= 0;
         memread <= '1';
-		wait for 5*clk_period;
+		wait for clk_period;
         address <= 1;
-		wait for 5*clk_period;
+		wait for clk_period;
         address <= 2;
-		wait for 5*clk_period;
+		wait for clk_period;
         address <= 3;
-		wait for 5*clk_period;
+		wait for clk_period;
         
         
         wait;
