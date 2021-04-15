@@ -6,17 +6,13 @@ use work.defs.all;
 entity forwarding_unit is
 
     port
-        ( reg_rs_ex : in  reg_t
-        ; reg_rt_ex : in  reg_t
-        ; reg_rd_mem  : in  reg_t
-        ; reg_rd_wb   : in  reg_t
+        ( reg_rs_ex : in std_logic_vector(4 downto 0)
+        ; reg_rt_ex : in std_logic_vector(4 downto 0)
+        ; reg_rd_mem  : in std_logic_vector(4 downto 0)
+        ; reg_rd_wb   : in std_logic_vector(4 downto 0)
         ; reg_wen_mem       : in  std_logic
         ; reg_wen_wb        : in  std_logic
 
-        ; data_1_forward_mem_en : out std_logic
-        ; data_2_forward_mem_en : out std_logic
-        ; data_1_forward_wb_en : out std_logic
-        ; data_2_forward_wb_en : out std_logic
 		  
 		  ; data_1_forward_mem : out std_logic_vector(1 downto 0)
 		  ; data_2_forward_mem : out std_logic_vector(1 downto 0)

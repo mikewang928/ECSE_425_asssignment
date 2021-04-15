@@ -5,9 +5,9 @@ use work.defs.all;
 
 entity hazard_detection is
     port ( mem_read_ex : in  std_logic
-         ; reg_rt_ex   : in   reg_t
-         ; reg_rs_id   : in   reg_t
-         ; reg_rt_id   : in   reg_t
+         ; reg_rt_ex   : in std_logic_vector(4 downto 0)
+         ; reg_rs_id   : in std_logic_vector(4 downto 0)
+         ; reg_rt_id   : in std_logic_vector(4 downto 0)
          ; insert_stall_mux: out  std_logic
 			; if_id_write : out std_logic 
         );
