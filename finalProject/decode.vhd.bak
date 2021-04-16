@@ -9,31 +9,31 @@ USE ieee.numeric_std.all;
 ENTITY decode IS
 	PORT (
 		clk : in std_logic;
-		instruction : in std_logic_vector(31 downto 0);  	-- fetched instruction
-		wb_data : in std_logic_vector(31 downto 0);  	 	-- data to write back to register
-		wb_reg : in std_logic_vector(4 downto 0);  			-- the register to write back to
-		wb : in std_logic;  											-- whether a write back is required (1) or not (0)
-		pc_in : in integer;  										-- incremented pc (pc+1) from fetch stage
+		instruction : in std_logic_vector(31 downto 0);  -- fetched instruction
+		wb_data : in std_logic_vector(31 downto 0);  -- data to write back to register
+		wb_reg : in std_logic_vector(4 downto 0);  -- the register to write back to
+		wb : in std_logic;  -- whether a write back is required (1) or not (0)
+		pc_in : in integer;  -- incremented pc (pc+1) from fetch stage
 		
-		pc_target : out integer;  									-- target pc for branch or jump
+		pc_target : out integer;  -- target pc for branch or jump
 		read_data_1 : out std_logic_vector(31 downto 0);
 		read_data_2 : out std_logic_vector(31 downto 0);
-		rt_out : out std_logic_vector(4 downto 0);			-- source register 
-		rs_out : out std_logic_vector(4 downto 0);			-- source register
-		rd_out : out std_logic_vector(4 downto 0				-- destination register
-		branch : out std_logic;  									-- branch or jump (1) or not (0)
+		rt_out : out std_logic_vector(4 downto 0);
+		rs_out : out std_logic_vector(4 downto 0);
+		rd_out : out std_logic_vector(4 downto 0);
+		branch : out std_logic;  -- branch or jump (1) or not (0)
 		
 		-- EX stage control signals
-		alu_op : out integer range 0 to 26;  					-- ALU operation
-		reg_dst : out std_logic;  									-- selecting whether rt (0) or rd (1) is the destination register
+		alu_op : out integer range 0 to 26;  -- ALU operation
+		reg_dst : out std_logic;  -- selecting whether rt (0) or rd (1) is the destination register
 		
 		-- M stage control signals
-		mem_write : out std_logic;  								-- whether write to memory is needed (1) or not (0)
-		mem_read : out std_logic;  								-- whether read from memory is needed (1) or not (0)
+		mem_write : out std_logic;  -- whether write to memory is needed (1) or not (0)
+		mem_read : out std_logic;  -- whether read from memory is needed (1) or not (0)
 		
 		-- WB stage control signals
-		reg_write : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
-		mem_to_reg : out std_logic  								-- selecting whether writeback data is read from memory (1) or from ALU result (0)
+		reg_write : out std_logic;  -- signal indicating whether a write to register is needed (1) or not (0)
+		mem_to_reg : out std_logic  -- selecting whether writeback data is read from memory (1) or from ALU result (0)
 		
 	);
 END decode;
@@ -47,18 +47,13 @@ ARCHITECTURE rtl OF decode IS
 BEGIN
 
 	process(clk) 
-		variable opcode,funct : std_logic_vector(5 downto 0);					-- 6 bits
-		variable rs,rt,rd,shamt : std_logic_vector(4 downto 0);				-- 5 bits
-		variable immediate : std_logic_vector(15 downto 0);					-- 16 bits
-		variable address : std_logic_vector(25 downto 0);						-- 26 bits
-		variable comparator : std_logic;  											-- compares the two register outputs, equal (1) or not (0)
-		variable jump_addr : std_logic_vector(31 downto 0);  					-- intermediate result for jump address computation
-	
+		variable opcode,funct : std_logic_vector(5 downto 0);
+		variable rs,rt,rd,shamt : std_logic_vector(4 downto 0);
+		variable immediate : std_logic_vector(15 downto 0);
+		variable address : std_logic_vector(25 downto 0);
+		variable comparator : std_logic;  -- compares the two register outputs, equal (1) or not (0)
+		variable jump_addr : std_logic_vector(31 downto 0);  -- intermediate result for jump address computation
 	begin
-	
-		-- instruction: 31-26:opcode; 25-21:rs; 20-16:rt; 15-11:rd; 10-6:shamt; 5-0: funct
-		--									  |<----------------   address(25-0) ---------------->|
-		--																|<------- immediate(15-0) ------>|
 		if rising_edge(clk) then
 			opcode := instruction(31 downto 26);
 			funct := instruction(5 downto 0);
@@ -68,22 +63,16 @@ BEGIN
 			shamt := instruction(10 downto 6);
 			immediate := instruction(15 downto 0);
 			address := instruction(25 downto 0);
-			read_data_1 <= register_bank(to_integer(unsigned(rs))); -- register indicated by rs 
-			read_data_2 <= register_bank(to_integer(unsigned(rt))); -- register indicated by rt
+			read_data_1 <= register_bank(to_integer(unsigned(rs)));
+			read_data_2 <= register_bank(to_integer(unsigned(rt)));
 			rt_out <= rt;
 			rd_out <= rd;
 			rs_out <= rs;
-			
-			
 			if register_bank(to_integer(unsigned(rs))) = register_bank(to_integer(unsigned(rt))) then
 				comparator := '1';
 			else
 				comparator := '0';
 			end if;
-			
-			
-			
-			
 			case opcode is
 			-- R type instructions
 			when "000000" => 
@@ -130,8 +119,8 @@ BEGIN
 						branch <= '1';
 						pc_target <= to_integer(unsigned(register_bank(to_integer(unsigned(rs))))) / 4;  -- PC = R[rs] and pc is word-addressed and integer
 					when others =>
+						
 				end case;
-				
 			-- I type instructions
 			when "001000" =>
 				alu_op <= 2; -- addi
@@ -248,8 +237,6 @@ BEGIN
 			when others =>
 				
 			end case;
-				
-				
 				
 		elsif falling_edge(clk) then  -- write back to register
 			if(wb = '1') then
