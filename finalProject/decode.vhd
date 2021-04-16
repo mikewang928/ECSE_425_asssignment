@@ -87,12 +87,12 @@ BEGIN
 			case opcode is
 			-- R type instructions
 			when "000000" => 
-				reg_dst <= '1';  -- rd as writeback destination register
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';
-				branch <= '0';
+				reg_dst <= '1';  		-- rd as writeback destination register
+				mem_read <= '0'; 		-- not reading from memory
+				mem_write <= '0';		-- not writing into the memory 
+				reg_write <= '1';		-- write to a register is needed
+				mem_to_reg <= '0';	-- wrtte back data is read from ALU
+				branch <= '0';			-- no brach or jump
 				case funct is
 					when "100000" =>  
 						alu_op <= 0; -- add
@@ -126,121 +126,123 @@ BEGIN
 						alu_op <= 19; -- sra						
 					when "001000" =>  
 						alu_op <= 25; -- jr
-						reg_write <= '0';
-						branch <= '1';
+						reg_write <= '0'; 	-- write to a register is needed
+						branch <= '1';			-- branch or jump
 						pc_target <= to_integer(unsigned(register_bank(to_integer(unsigned(rs))))) / 4;  -- PC = R[rs] and pc is word-addressed and integer
 					when others =>
 				end case;
 				
+				
+				
 			-- I type instructions
 			when "001000" =>
 				alu_op <= 2; -- addi
-				read_data_2 <= std_logic_vector(resize(signed(immediate), 32));
-				reg_dst <= '0';
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';				
-				branch <= '0';
+				read_data_2 <= std_logic_vector(resize(signed(immediate), 32)); 
+				reg_dst <= '0';				-- rt as writeback destination register
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
+				mem_to_reg <= '0';			-- write back data is read from ALU		
+				branch <= '0';					-- no brach or jump
 			when "001010" =>
 				alu_op <= 6; -- slti
 				read_data_2 <= std_logic_vector(resize(signed(immediate), 32));
-				reg_dst <= '0';
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';
-				branch <= '0';
+				reg_dst <= '0';				-- rt as writeback destination register
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '0';					-- no brach or jump
 			when "001100" =>
 				alu_op <= 11; -- andi
 				read_data_2 <= x"0000" & immediate;
-				reg_dst <= '0';
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';
-				branch <= '0';
+				reg_dst <= '0';				-- rt as writeback destination register
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '0';					-- no brach or jump
 			when "001101" =>
 				alu_op <= 12; -- ori
 				read_data_2 <= x"0000" & immediate;
-				reg_dst <= '0';
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';
-				branch <= '0';
+				reg_dst <= '0';				-- rt as writeback destination register
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '0';					-- no brach or jump
 			when "001110" =>
 				alu_op <= 13; -- xori
 				read_data_2 <= x"0000" & immediate;
-				reg_dst <= '0';
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';
-				branch <= '0';
+				reg_dst <= '0';				-- rt as writeback destination register
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '0';					-- no brach or jump
 			when "001111" =>
 				alu_op <= 16; -- lui
 				read_data_2 <= x"0000" & immediate;
-				reg_dst <= '0';
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';
-				branch <= '0';
+				reg_dst <= '0';				-- rt as writeback destination register
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '0';					-- no brach or jump
 			when "100011" =>
 				alu_op <= 20; -- lw
 				read_data_2 <= std_logic_vector(resize(signed(immediate), 32));
-				reg_dst <= '0';
+				reg_dst <= '0';				-- rt as writeback destination register
 				mem_read <= '1';
-				mem_write <= '0';
-				reg_write <= '1';
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
 				mem_to_reg <= '1';
-				branch <= '0';
+				branch <= '0';					-- no brach or jump
 			when "101011" =>
 				alu_op <= 21; -- sw
 				read_data_2 <= std_logic_vector(resize(signed(immediate), 32));
-				mem_read <= '0';
+				mem_read <= '0';				-- not reading from memory				
 				mem_write <= '1';
 				reg_write <= '0';
-				mem_to_reg <= '0';
-				branch <= '0';
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '0';					-- no brach or jump
 			when "000100" =>
 				alu_op <= 22; -- beq
 				read_data_2 <= std_logic_vector(resize(signed(immediate), 32));
-				mem_read <= '0';
-				mem_write <= '0';
+				mem_read <= '0';				-- not reading from memory				-
+				mem_write <= '0';				-- not writing into the memory
 				reg_write <= '0';
-				mem_to_reg <= '0';
-				branch <= comparator;
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= comparator;		-- branch or jump (1) or not (0) depends on the compartor's value
 				pc_target <= pc_in + to_integer(signed(immediate));  -- no need to left shift by 2 and sign extend since pc is word-addressed and integer format
 			when "000101" =>
 				alu_op <= 23; -- bne
 				read_data_2 <= std_logic_vector(resize(signed(immediate), 32));
-				mem_read <= '0';
-				mem_write <= '0';
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
 				reg_write <= '0';
-				mem_to_reg <= '0';
-				branch <= not comparator;
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= not comparator; 	-- branch or jump (1) or not (0) depends on the compartor's value
 				pc_target <= pc_in + to_integer(signed(immediate));  -- no need to left shift by 2 and sign extend since pc is word-addressed and integer format
 			-- J type instruction
 			when "000010" =>
 				alu_op <= 24; -- j
-				mem_read <= '0';
-				mem_write <= '0';
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
 				reg_write <= '0';
-				mem_to_reg <= '0';
-				branch <= '1';
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '1';					-- branch or jump
 				jump_addr := std_logic_vector(to_unsigned(pc_in*4, 32));
 				pc_target <= to_integer(unsigned(std_logic_vector'(jump_addr(31 downto 28) & address & "00"))) / 4;  -- refer to MIPS reference, pc is integer and word-addressed
 			when "000011" =>
 				alu_op <= 26; -- jal
-				mem_read <= '0';
-				mem_write <= '0';
-				reg_write <= '1';
-				mem_to_reg <= '0';
-				branch <= '1';
-				reg_dst <= '1';  -- store 31 in rd_out
-				rd_out <= "11111";
+				mem_read <= '0';				-- not reading from memory
+				mem_write <= '0';				-- not writing into the memory
+				reg_write <= '1';				-- write to a register is needed
+				mem_to_reg <= '0';			-- write back data is read from ALU
+				branch <= '1';					-- branch or jump
+				reg_dst <= '1';  				-- rd as writeback destination register
+				rd_out <= "11111";			-- store 31 in rd_out 
 				read_data_1 <= std_logic_vector(to_unsigned(pc_in, 32));  -- R[31] = (pc+1)+1 (word-addressed)
 				read_data_2 <= x"00000001";
 				jump_addr := std_logic_vector(to_unsigned(pc_in*4, 32));
@@ -249,9 +251,10 @@ BEGIN
 				
 			end case;
 				
-				
-				
-		elsif falling_edge(clk) then  -- write back to register
+		
+		
+		-- write back to register		
+		elsif falling_edge(clk) then  
 			if(wb = '1') then
 				if(wb_reg = "00000") then  -- R0 is always 0
 					register_bank(to_integer(unsigned(wb_reg))) <= x"00000000";
