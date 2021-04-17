@@ -106,6 +106,7 @@ BEGIN
 						reg_write <= '0';  -- writes to HI and LO
 					when "101010" =>  
 						alu_op <= 5; -- slt
+						
 					when "100100" =>  
 						alu_op <= 7; -- and
 					when "100101" =>  

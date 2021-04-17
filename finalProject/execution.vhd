@@ -7,19 +7,31 @@ entity execution is
 	port(
 		clk : in std_logic;
 		-- oparends 
-		decode_data_1: in std_logic_vector(31 downto 0);		
-		decode_data_2: in std_logic_vector(31 downto 0);		
-		forwarding_write_back_data: in std_logic_vector(31 downto 0);
-		forwarding_ex_data: in std_logic_vector(31 downto 0);
-		forwarding_signal_1: in std_logic; 						 
-		forwarding_signal_2: in std_logic;						
+		decode_data_1: in std_logic_vector(31 downto 0);						-- read_data_1 from decode stage  
+		decode_data_2: in std_logic_vector(31 downto 0);						-- read_data_2 from decode stage 
+		rt_in: in std_logic_vector(4 downto 0);									-- rt from the decode stage 
+		rs_in: in std_logic_vector(4 downto 0);									-- rs from the decode stage
 		
-		rt_in: in std_logic_vector(4 downto 0);
-		rs_in: in std_logic_vector(4 downto 0);
+		-- inputs form the Forward unit: 
+					-----------------------------------------------------
+					-- 	    mux control 			|        source		--
+					-----------------------------------------------------
+					--			    00               |         ID/EX		--
+					-----------------------------------------------------
+					--				 10					|			 EX/MEM     --
+					-----------------------------------------------------
+					--				 01					|         MEM/WB     --
+					-----------------------------------------------------
+		forwarding_write_back_data: in std_logic_vector(31 downto 0);		-- forwarding data from the write back stage
+		forwarding_mem_data: in std_logic_vector(31 downto 0);				-- forwarding data from the mem stage
+		forwarding_signal_1: in std_logic_vector(1 downto 0); 				-- alu input mux  				
+		forwarding_signal_2: in std_logic_vector(1 downto 0);					-- alu input mux 
+		
+		
 		
 		-- EX stage control signals
-		alu_op : in integer range 0 to 26;  					-- ALU operation
-		reg_dst : in std_logic;  									-- selecting whether rt (0) or rd (1) is the destination register
+		alu_op_ex : in integer range 0 to 26;  					-- ALU operation control bits
+		reg_dst_ex : in std_logic;  									-- selecting whether rt (0) or rd (1) is the destination register
 		
 		-- M stage control signals in
 		mem_write : in std_logic;  								-- whether write to memory is needed (1) or not (0)
@@ -34,12 +46,12 @@ entity execution is
 		alu_out : out std_logic_vector (31 downto 0);
 		
 		-- M stage control signals out
-		mem_write : out std_logic;  								-- whether write to memory is needed (1) or not (0)
-		mem_read : out std_logic;  								-- whether read from memory is needed (1) or not (0)
+		mem_write_out : out std_logic;  								-- whether write to memory is needed (1) or not (0)
+		mem_read_out : out std_logic;  								-- whether read from memory is needed (1) or not (0)
 		
 		-- WB stage control signals out
-		reg_write : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
-		mem_to_reg : out std_logic  								-- selecting whether writeback data is read
+		reg_write_out : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+		mem_to_reg_out : out std_logic  								-- selecting whether writeback data is read
 		
 	);
 end execution;
@@ -71,27 +83,27 @@ begin
 					--				 01					|         MEM/WB     --
 					-----------------------------------------------------
 				
-				-- mux 1: decode_data_1 or forwarding_write_back_data or forwarding_ex_data
+				-- mux 1: decode_data_1 or forwarding_write_back_data or forwarding_mem_data
 				if (forwarding_signal_1 = '00') then
 					mux_output_1 <=  decode_data_1; 
 				elsif (forwarding_signal_1 = '01') then 
 					mux_output_1 <= forwarding_write_back_data;
 				elsif (forwarding_signal_1 = '10') then 
-					mux_output_1 <= forwarding_ex_data;
+					mux_output_1 <= forwarding_mem_data;
 				end if 
 				
-				-- mux 2: decode_data_2 or forwarding_write_back_data or forwarding_ex_data
+				-- mux 2: decode_data_2 or forwarding_write_back_data or forwarding_mem_data
 				if (forwarding_signal_2 = '00') then
 					mux_output_2 <=  decode_data_1; 
 				elsif (forwarding_signal_2 = '01') then 
 					mux_output_2 <= forwarding_write_back_data;
 				elsif (forwarding_signal_2 = '10') then 
-					mux_output_2 <= forwarding_ex_data;
+					mux_output_2 <= forwarding_mem_data;
 				end if 
 				
 				
 				-- mux 3: rt(0) or rd(1)
-				if (reg_dst = '0') then 
+				if (reg_dst_ex = '0') then 
 					mux_register_out <= rt_in
 				else
 					mux_register_out <= rd_in
@@ -99,7 +111,7 @@ begin
 		
 				-- alu logic 
 				-- operend: mux_output_1 and mux_output_2
-				case alu_op is 
+				case alu_op_ex is 
 				when 0 => -- add
 					alu_out <= mux_output_1 + mux_output_2; 
 					
