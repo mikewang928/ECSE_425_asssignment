@@ -183,15 +183,15 @@ begin
 				when 19 => -- sra (shift right arthemic)
 					alu_out <= shift_right(signed(mux_output_1), to_integer(signed(mux_output_2)));
 					
-				when 20 => -- lw
-				when 21 => -- sw
-				
-				when 22 => -- beq
-				when 23 => -- bne
-				
-				when 24 => -- j
-				when 25 => -- jr
-				when 26 => -- jal
+--				when 20 => -- lw
+--				when 21 => -- sw
+--				
+--				when 22 => -- beq
+--				when 23 => -- bne
+--				
+--				when 24 => -- j
+--				when 25 => -- jr
+--				when 26 => -- jal
 		
 
 
