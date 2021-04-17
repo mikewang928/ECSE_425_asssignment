@@ -20,7 +20,7 @@ ENTITY decode IS
 		read_data_2 : out std_logic_vector(31 downto 0);
 		rt_out : out std_logic_vector(4 downto 0);			-- source register 
 		rs_out : out std_logic_vector(4 downto 0);			-- source register
-		rd_out : out std_logic_vector(4 downto 0				-- destination register
+		rd_out : out std_logic_vector(4 downto 0);			-- destination register
 		branch : out std_logic;  									-- branch or jump (1) or not (0)
 		
 		-- EX stage control signals
