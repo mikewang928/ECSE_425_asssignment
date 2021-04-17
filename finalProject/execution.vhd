@@ -183,7 +183,7 @@ begin
 					-- 1001 -> 0001/ 1111
 					when 18 => -- srl	(shift right logical)
 						ZERO := x"00000000";
-						mux_output_2 := x"00000000"; -- this line is only to allow the program to compile, when running the pipeline or testing remove this line!!!
+--						mux_output_2 := x"00000000"; -- this line is only to allow the program to compile, when running the pipeline or testing remove this line!!!
 						shifted_bits := to_integer(signed(mux_output_2));
 						report("shifted_bits: " & integer'image(shifted_bits));
 						alu_out <= std_logic_vector(ZERO + signed(mux_output_1)(31 downto shifted_bits)); -- in order to compile mux_output_2 (decode_data_2) must have some value 
