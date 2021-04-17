@@ -5,6 +5,7 @@ use ieee.numeric_std.all;
 
 entity execution is
 	port(
+		-- clk
 		clk : in std_logic;
 		-- oparends 
 		decode_data_1: in std_logic_vector(31 downto 0);						-- read_data_1 from decode stage  
