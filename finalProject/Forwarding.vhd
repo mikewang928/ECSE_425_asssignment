@@ -1,9 +1,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use work.defs.all;
 
-entity forwarding_unit is
+
+-- forwarding_unit
+entity Forwarding is
 	-- instruction: 31-26:opcode; 25-21:rs; 20-16:rt; 15-11:rd; 10-6:shamt; 5-0: funct
 	--									  |<----------------   address(25-0) ---------------->|
 	--																|<------- immediate(15-0) ------>|
@@ -22,23 +23,27 @@ entity forwarding_unit is
 		  ; data_2_forward_wb : out std_logic_vector(1 downto 0)
         );
 
-end forwarding_unit;
+end Forwarding;
 
 
 
-architecture Behavioral of forwarding_unit is
+architecture Behavioral of Forwarding is
 
 --Internal signals, as the values are being read.
-signal data_1_forward_mem_i : std_logic_vector(1 downto 0)
-signal data_2_forward_mem_i : std_logic_vector(1 downto 0)
+signal data_1_forward_mem_i : std_logic_vector(1 downto 0);
+signal data_2_forward_mem_i : std_logic_vector(1 downto 0);
 
 begin
 
 --Connect internal signals and output
   
-  data_1_forward_mem <= data_1_forward_mem_i;
-  data_2_forward_mem <= data_2_forward_mem_i;
+	data_1_forward_mem <= data_1_forward_mem_i;
+	data_2_forward_mem <= data_2_forward_mem_i;
 
+	
+	
+	
+	
     forwarding_logic:
         process ( reg_rs_ex
                 , reg_rt_ex
@@ -61,11 +66,11 @@ begin
 				--				 01					|         MEM/WB     --
 				-----------------------------------------------------
 				
-				data_1_forward_mem_i <= '00';
-				data_2_forward_mem_i <= '00';
+				data_1_forward_mem_i <= "00";
+				data_2_forward_mem_i <= "00";
 				
-            data_1_forward_wb <= '00';
-            data_2_forward_wb <= '00';
+            data_1_forward_wb <= "00";
+            data_2_forward_wb <= "00";
 
             -----------------------------
             --EX hazard detection and MEM hazard detection
@@ -79,16 +84,16 @@ begin
             -----------------------------
 				
             if reg_wen_mem = '1' and reg_rd_mem /= "00000" and reg_rd_mem = reg_rs_ex then 
-              data_1_forward_mem_i <= '10'; 
+              data_1_forward_mem_i <= "10"; 
 				elsif reg_wen_wb = '1' and reg_rd_wb /= "00000" and reg_rd_wb = reg_rs_ex then
-              data_1_forward_wb_en <= '01';
+              data_1_forward_wb <= "01";
             end if; 
 				
             
             if reg_wen_mem = '1' and reg_rd_mem /= "00000" and reg_rd_mem = reg_rt_ex then 
-              data_2_forward_mem_i <= '10';
+              data_2_forward_mem_i <= "10";
 				elsif reg_wen_wb = '1' and reg_rd_wb /= "00000" and reg_rd_wb = reg_rt_ex then
-              data_2_forward_wb_en <= '01';
+              data_2_forward_wb <= "01";
             end if;
             
 
