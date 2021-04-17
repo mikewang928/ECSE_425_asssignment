@@ -4,7 +4,9 @@ use ieee.numeric_std.all;
 use work.defs.all;
 
 entity forwarding_unit is
-
+	-- instruction: 31-26:opcode; 25-21:rs; 20-16:rt; 15-11:rd; 10-6:shamt; 5-0: funct
+	--									  |<----------------   address(25-0) ---------------->|
+	--																|<------- immediate(15-0) ------>|
     port
         ( reg_rs_ex : in std_logic_vector(4 downto 0)
         ; reg_rt_ex : in std_logic_vector(4 downto 0)
