@@ -38,6 +38,7 @@ ENTITY decode IS
 	);
 END decode;
 
+
 ARCHITECTURE rtl OF decode IS
 	
 	-- 32 registers of 32 bits each
