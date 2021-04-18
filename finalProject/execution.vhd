@@ -11,6 +11,7 @@ entity execution is
 		-- oparends 
 		decode_data_1: in std_logic_vector(31 downto 0);						-- read_data_1 from decode stage  
 		decode_data_2: in std_logic_vector(31 downto 0);						-- read_data_2 from decode stage 
+		rt_data_in : in std_logic_vector(31 downto 0);							-- data stored in register rt
 		rt_in: in std_logic_vector(4 downto 0);									-- rt from the decode stage 
 		rs_in: in std_logic_vector(4 downto 0);									-- rs from the decode stage
 		rd_in: in std_logic_vector(4 downto 0);									-- rd from the decode stage
@@ -39,9 +40,9 @@ entity execution is
 		mem_write : in std_logic;  								-- whether write to memory is needed (1) or not (0)
 		mem_read : in std_logic;  									-- whether read from memory is needed (1) or not (0)
 		
-		-- WB stage control signals in
-		reg_write : in std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
-		mem_to_reg : in std_logic;  								-- selecting whether writeback data is read
+--		-- WB stage control signals in
+--		reg_write : in std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+--		mem_to_reg : in std_logic;  								-- selecting whether writeback data is read
 		 
 		 
 		-- alu out put
@@ -49,11 +50,12 @@ entity execution is
 		
 		-- M stage control signals out
 		mem_write_out : out std_logic;  								-- whether write to memory is needed (1) or not (0)
-		mem_read_out : out std_logic;  								-- whether read from memory is needed (1) or not (0)
+		mem_data_write : out std_logic_vector(31 downto 0); 	-- data write into the memory
+		mem_read_out : out std_logic  								-- whether read from memory is needed (1) or not (0)
 		
-		-- WB stage control signals out
-		reg_write_out : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
-		mem_to_reg_out : out std_logic  								-- selecting whether writeback data is read
+--		-- WB stage control signals out
+--		reg_write_out : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+--		mem_to_reg_out : out std_logic  								-- selecting whether writeback data is read
 		
 	);
 end execution;
@@ -183,7 +185,7 @@ begin
 					-- 1001 -> 0001/ 1111
 					when 18 => -- srl	(shift right logical)
 						ZERO := x"00000000";
---						mux_output_2 := x"00000000"; -- this line is only to allow the program to compile, when running the pipeline or testing remove this line!!!
+						mux_output_2 := x"00000000"; -- this line is only to allow the program to compile, when running the pipeline or testing remove this line!!!
 						shifted_bits := to_integer(signed(mux_output_2));
 						report("shifted_bits: " & integer'image(shifted_bits));
 						alu_out <= std_logic_vector(ZERO + signed(mux_output_1)(31 downto shifted_bits)); -- in order to compile mux_output_2 (decode_data_2) must have some value 
@@ -191,15 +193,21 @@ begin
 					when 19 => -- sra (shift right arthemic)
 						alu_out <= std_logic_vector(shift_right(signed(mux_output_1), to_integer(signed(mux_output_2))));
 						
-					when 20 => -- lw
-					when 21 => -- sw
-					
-					when 22 => -- beq
-					when 23 => -- bne
-					
-					when 24 => -- j
-					when 25 => -- jr
+					when 20 => -- lw (load word)
+						alu_out <= std_logic_vector(signed(mux_output_1) + signed(mux_output_2)); -- alu_out is the memory address
+					when 21 => -- sw (store word)
+						alu_out <= std_logic_vector(signed(mux_output_1) + signed(mux_output_2));
+						mem_data_write <= rt_data_in;
+					when 22 => -- beq (already taken cared of in decode stage)
+						alu_out <= x"00000000";
+					when 23 => -- bne (already taken cared of in decode stage)
+						alu_out <= x"00000000";
+					when 24 => -- j (already taken cared of in decode stage)
+						alu_out <= x"00000000";
+					when 25 => -- jr (already taken cared of in decode stage)
+						alu_out <= x"00000000";
 					when 26 => -- jal
+						alu_out <= std_logic_vector(signed(mux_output_1) + signed(mux_output_2)); -- R[31] = (PC+1)+1 (mux_output_1 = PC +1; mux_output_2 = x"00000001") stored in register 31
 		
 			end case; 
 		end if; 

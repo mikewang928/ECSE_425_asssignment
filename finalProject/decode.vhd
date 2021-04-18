@@ -18,6 +18,7 @@ ENTITY decode IS
 		pc_target : out integer;  									-- target pc for branch or jump
 		read_data_1 : out std_logic_vector(31 downto 0);
 		read_data_2 : out std_logic_vector(31 downto 0);
+		rt_data : out std_logic_vector(31 downto 0);			-- when sw this signal contains the value stored in rt
 		rt_out : out std_logic_vector(4 downto 0);			-- source register 
 		rs_out : out std_logic_vector(4 downto 0);			-- source register
 		rd_out : out std_logic_vector(4 downto 0);			-- destination register
@@ -71,6 +72,7 @@ BEGIN
 			address := instruction(25 downto 0);
 			read_data_1 <= register_bank(to_integer(unsigned(rs))); -- register indicated by rs 
 			read_data_2 <= register_bank(to_integer(unsigned(rt))); -- register indicated by rt
+			rt_data <= register_bank(to_integer(unsigned(rt))); -- register indicated by rt
 			rt_out <= rt;
 			rd_out <= rd;
 			rs_out <= rs;
