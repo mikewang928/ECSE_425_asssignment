@@ -142,80 +142,90 @@ architecture cpuPipeline_arch of cpuPipeline is
 	end component; 
 	
 	
+	-- signals for hazard_detection
+	signal reg_rt_ex_s  : in std_logic_vector(4 downto 0);
+	signal reg_rs_id_s   : in std_logic_vector(4 downto 0);
+	signal reg_rt_id_s   : in std_logic_vector(4 downto 0);
+	signal insert_stall_mux_s : out  std_logic;
+	signal if_id_write_s : out std_logic ;
 	
+	
+	
+	-- signals for writeback 
+	signal reg_write_in_wb_s:			in std_logic;
+	signal mem_to_reg_in_wb_s:			in std_logic;
+	signal read_data_wb_s:		in std_logic_vector(31 downto 0);
+	signal alu_in_wb_s:		in std_logic_vector(31 downto 0);
+	signal reg_to_write_in_wb_s: in std_logic_vector(4 downto 0); -- which register to write to
+
+	signal mem_to_reg_out_wb_s:	out std_logic;
+	signal write_data_wb_s:			out std_logic_vector(31 downto 0);
+	signal reg_to_write_out_wb_s: out std_logic_vector(4 downto 0) -- pass to the decode stage
+	
+	
+	-- signals for Memory
+	signal mem_write_in_MEM_s : in std_logic;  								-- whether write to memory is needed (1) or not (0)
+	signal mem_data_write_MEM_s  : in std_logic_vector(31 downto 0); 	-- data write into the memory
+	signal mem_read_in_MEM_s  : in std_logic;  									-- whether read from memory is needed (1) or not (0)
+	signal alu_in_MEM_s  : in std_logic_vector (31 downto 0); 				-- address that we want to read/write
+	signal reg_write_in_MEM_s  : in std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+	signal mem_to_reg_in_MEM_s  : in std_logic; 								-- selecting whether writeback data is read
+	signal reg_write_out_MEM_s  : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+	signal mem_to_reg_out_MEM_s  : out std_logic; 								-- selecting whether writeback data is read
+	signal read_data_MEM_s  : out std_logic_vector(31 downto 0);
+	signal alu_out_MEM_s  : out std_logic_vector (31 downto 0);
 
 
+	-- signals for Forwarding
+	signal reg_rs_ex_forwarding_s : in std_logic_vector(4 downto 0)
+	signal reg_rt_ex_forwarding_s  : in std_logic_vector(4 downto 0)
+	signal reg_rd_mem_forwarding_s   : in std_logic_vector(4 downto 0)
+	signal reg_rd_wb_forwarding_s    : in std_logic_vector(4 downto 0)
+	signal reg_wen_mem_forwarding_s  : in  std_logic
+	signal reg_wen_wb_forwarding_s   : in  std_logic
+	signal data_1_forward_mem_forwarding_s  : out std_logic_vector(1 downto 0)
+	signal data_2_forward_mem_forwarding_s  : out std_logic_vector(1 downto 0)
+	signal data_1_forward_wb_forwarding_s  : out std_logic_vector(1 downto 0)
+	signal data_2_forward_wb_forwarding_s  : out std_logic_vector(1 downto 0)
+	
+	
+	
+	-- signals for decode
+	signal instruction_decode_s : in std_logic_vector(31 downto 0);  	-- fetched instruction
+	signal wb_data_decode_s : in std_logic_vector(31 downto 0);  	 	-- data to write back to register
+	signal wb_reg_decode_s : in std_logic_vector(4 downto 0);  			-- the register to write back to
+	signal wb_decode_s : in std_logic;  											-- whether a write back is required (1) or not (0)
+	signal pc_in_decode_s : in integer;  										-- incremented pc (pc+1) from fetch stage
+	signal pc_target_decode_s : out integer;  									-- target pc for branch or jump
+	signal read_data_1_decode_s : out std_logic_vector(31 downto 0);
+	signal read_data_2_decode_s : out std_logic_vector(31 downto 0);
+	signal rt_data_decode_s : out std_logic_vector(31 downto 0);			-- when sw this signal contains the value stored in rt
+	signal rt_out_decode_s : out std_logic_vector(4 downto 0);			-- source register 
+	signal rs_out_decode_s : out std_logic_vector(4 downto 0);			-- source register
+	signal rd_out_decode_s : out std_logic_vector(4 downto 0);			-- destination register
+	signal branch_decode_s : out std_logic;  									-- branch or jump (1) or not (0)
+	signal alu_op_decode_s : out integer range 0 to 26;  					-- ALU operation
+	signal reg_dst_decode_s : out std_logic;  									-- selecting whether rt (0) or rd (1) is the destination register
+	signal mem_write_decode_s : out std_logic;  								-- whether write to memory is needed (1) or not (0)
+	signal mem_read_decode_s : out std_logic;  								-- whether read from memory is needed (1) or not (0)
+	signal reg_write_decode_s : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+	signal mem_to_reg_decode_s : out std_logic  								-- selecting whether writeback data is read from memory (1) or from ALU result (0)
+	
+	
+	-- signals for fetch
+	signal fetch_out_detch_s : out std_logic_vector(31 downto 0);					-- feched out data
+	signal pc_out_detch_s  : out integer;													-- @TODO: not impemented? 
+	signal pc_in_detch_s  : in integer;														-- external pc 
+	signal pc_src_detch_s  : in std_logic;  												-- source of next_pc, pc+1 (0) or external pc (1)
+	signal pc_stall_detch_s  : in std_logic;  												-- whether pc needs to be stalled (1) or not (0)
+	signal reset_detch_s  : in std_logic
+	
+	-- signals for instruction memory
+	signal memread_IM_S : IN STD_LOGIC;
+	signal address_IM_S : IN INTEGER RANGE 0 TO ram_size-1;
+	signal readdata_IM_S : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
+	signal waitrequest_IM_S : OUT STD_LOGIC
  
- -- STALL SIGNALS 
-signal IDEXStructuralStall : std_logic;
-signal EXMEMStructuralStall : std_logic;
-signal structuralStall : std_logic;
-signal pcStall : std_logic;
--- TEST SIGNALS 
-signal muxInput : STD_LOGIC_VECTOR(31 downto 0) := "00000000000000000000000000000000";
-signal selectInput : std_logic := '1';
-signal fourInt : INTEGER := 4;
-
--- PIPELINE IFID
---address goes to both IFID and IDEX
-signal address : std_logic_vector(31 downto 0);
-signal instruction : std_logic_vector(31 downto 0);
-signal IFIDaddress : std_logic_vector(31 downto 0);
-signal IFIDinstruction : std_logic_vector(31 downto 0);
-
---PIPELINE IDEX
-
-signal IDEXaddress : std_logic_vector(31 downto 0);
-signal IDEXra : std_logic_vector(31 downto 0);
-signal IDEXrb : std_logic_vector(31 downto 0);
-signal IDEXimmediate : std_logic_vector(31 downto 0);
-signal IDEXrd : std_logic_vector (4 downto 0);
-signal IDEXALU1srcO, IDEXALU2srcO, IDEXMemReadO, IDEXMeMWriteO, IDEXRegWriteO, IDEXMemToRegO: std_logic;
-signal IDEXAluOp : std_logic_vector (4 downto 0);
-
-
--- SIGNALS FOR CONTROLLER
-signal opcodeInput,functInput : std_logic_vector(5 downto 0);
-signal ALU1srcO,ALU2srcO,MemReadO,MemWriteO,RegWriteO,MemToRegO,RType,Jtype,Shift: std_logic;
-signal ALUOp : std_logic_vector(4 downto 0);
-
--- SIGNALS FOR REGISTERS
-signal rs,rt,rd,WBrd : std_logic_vector (4 downto 0);
-signal rd_data: std_logic_vector(31 downto 0);
-signal write_enable : std_logic;
-signal ra,rb : std_logic_vector(31 downto 0);
-signal shamnt : std_logic_vector(4 downto 0);
-
-signal immediate : std_logic_vector(15 downto 0); 
-signal immediate_out : std_logic_vector(31 downto 0);
-
--- SIGNALS FOR EXECUTE STAGE  
-signal muxOutput1 : std_logic_vector(31 downto 0);
-signal muxOutput2 : std_logic_vector(31 downto 0);
-signal aluOutput : std_logic_vector(31 downto 0);
-signal zeroOutput : std_logic;
-
--- SIGNALS FOR EXMEM
-signal EXMEMBranch : std_logic; -- need the zero variable 
-signal ctrl_jal : std_logic;
-signal EXMEMaluOutput : std_logic_vector(31 downto 0);
-signal EXMEMregisterOutput : std_logic_vector(31 downto 0);
-signal EXMEMrd : std_logic_vector(4 downto 0);
-signal EXMEMMemReadO, EXMEMMeMWriteO, EXMEMRegWriteO, EXMEMMemToRegO: std_logic;
-
--- MEM SIGNALS 
-signal MEMWBmemOutput : std_logic_vector(31 downto 0);
-signal MEMWBaluOutput : std_logic_vector(31 downto 0);
-signal MEMWBrd : std_logic_vector(4 downto 0);
-signal memtoReg : std_logic;
-signal regWrite : std_logic;
-
-signal	MEMwritedata : std_logic_vector(31 downto 0);
-signal	MEMaddress : INTEGER;
-signal	MEMmemwrite : STD_LOGIC;
-signal	MEMmemread  : STD_LOGIC;
-signal	MEMreaddata : std_logic_vector(31 downto 0);
-signal	MEMwaitrequest : STD_LOGIC;
 
 begin
 
