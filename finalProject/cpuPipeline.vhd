@@ -143,11 +143,11 @@ architecture cpuPipeline_arch of cpuPipeline is
 	
 	
 	-- signals for hazard_detection
-	signal reg_rt_ex_s  : in std_logic_vector(4 downto 0);
-	signal reg_rs_id_s   : in std_logic_vector(4 downto 0);
-	signal reg_rt_id_s   : in std_logic_vector(4 downto 0);
-	signal insert_stall_mux_s : out  std_logic;
-	signal if_id_write_s : out std_logic ;
+	signal reg_rt_ex_hazard_s  : in std_logic_vector(4 downto 0);
+	signal reg_rs_id_hazard_s   : in std_logic_vector(4 downto 0);
+	signal reg_rt_id_hazard_s   : in std_logic_vector(4 downto 0);
+	signal insert_stall_mux_hazard_s : out  std_logic;
+	signal if_id_write_hazard_s : out std_logic ;
 	
 	
 	
@@ -229,143 +229,116 @@ architecture cpuPipeline_arch of cpuPipeline is
 
 begin
 
-IFS : instructionFetchStage
-port map(
-	clk => clk,
-	muxInput0 => EXMEMaluOutput,
-	selectInputs => EXMEMBranch,
-	four => fourInt,
-	structuralStall => structuralStall,
-	pcStall => pcStall,
-	selectOutput => address,
-	instructionMemoryOutput => instruction
-);
--- DECODE STAGE 
-CT : controller 
-port map(
-	clk => clk,
-	opcode => opcodeInput, 
-	funct => functInput,
-	branch => zeroOutput,
-	oldBranch => EXMEMBranch,
-	ALU1src => ALU1srcO,
-	ALU2src => ALU2srcO,
-	MemRead => MemReadO,
-	MemWrite => MemWriteO,
-	RegWrite => RegWriteO,
-	MemToReg => MemToRegO,
-	structuralStall => IDEXStructuralStall,
-	ALUOp => ALUOp,
-	Shift => Shift,
-	RType => RType,
-	JType => JType
-	
-);
 
-RegisterFile : register_file
-port map (
-	clock => clk,
-	rs => rs,
-	rt => rt,
-	write_enable => write_enable,
-	rd => WBrd,
-	rd_data => rd_data,
-	writeToText => writeToRegisterFile,
-	ra_data => ra,
-	rb_data => rb
-);
-
-se : signextender
-port map(
-immediate_in => immediate,
-immediate_out => immediate_out
-);
-
--- EXECUTE STAGE 
-exMux1 : mux 
-port map (
-input0 => IDEXra,
-input1 => IDEXaddress,
-selectInput => IDEXALU1srcO,
-selectOutput => muxOutput1
-);
-
-exMux2 : mux 
-port map (
-input0 => IDEXimmediate,
-input1 => IDEXrb,
-selectInput => IDEXALU2srcO,
-selectOutput => muxOutput2
-);
-
-operator : alu 
+IM: instruction_memory
 port map( 
-input_a => muxOutput1,
-input_b => muxOutput2,
-SEL => IDEXAluOp,
-out_alu => aluOutput
+	memread => memread_IM_S,
+	address => address_IM_S,
+	readdata => readdata_IM_S,
+	waitrequest => waitrequest_IM_S
 );
 
-zr : zero 
-port map (
-input_a => IDEXra,
-input_b => IDEXrb, 
-optype => IDEXAluOp,  
-result => zeroOutput
+
+Fth: fetch
+port map(
+	fetch_out => fetch_out_detch_s,
+	pc_out => pc_out_detch_s,
+	pc_in => pc_in_detch_s,
+	pc_src => pc_src_detch_s,
+	pc_stall => pc_stall_detch_s,
+	reset => reset_detch_s
 );
 
-memStage : mem
-port map (
-	clk =>clk,
-	-- Control lines
-	ctrl_write => EXMEMMemWriteO,
-	ctrl_read => EXMEMMemReadO,
-	ctrl_memtoreg_in => EXMEMMemToRegO,
-	ctrl_memtoreg_out => memtoReg,
-	ctrl_regwrite_in => EXMEMRegWriteO,
-	ctrl_regwrite_out => regWrite,
-	ctrl_jal => ctrl_jal,
 
-	--Ports of stage
-	alu_in => EXMEMaluOutput,
-	alu_out=>  MEMWBaluOutput,
-	mem_data_in => EXMEMregisterOutput,
-	mem_data_out => MEMWBmemOutput, 
-	write_addr_in => EXMEMrd,
-	write_addr_out => MEMWBrd,
+
+Dcd: decode
+port map(
+	clk  => 
+	instruction => instruction_decode_s,
+	wb_data => wb_data_decode_s,
+	wb_reg => wb_reg_decode_s,
+	wb => wb_decode_s,
+	pc_in => pc_in_decode_s,
+	pc_target => pc_target_decode_s,
+	read_data_1 => read_data_1_decode_s,
+	read_data_2 => read_data_2_decode_s,
+	rt_data => rt_data_decode_s,
+	rt_out => rt_out_decode_s,
+	rs_out => rs_out_decode_s,
+	rd_out => rd_out_decode_s,
+	branch => branch_decode_s,
+	alu_op => alu_op_decode_s,
+	reg_dst => reg_dst_decode_s,
+	mem_write => mem_write_decode_s,
+	mem_read => mem_read_decode_s,
+	reg_write => reg_write_decode_s,
+	mem_to_reg => mem_to_reg_decode_s
+);
+
+
+
+Fwd： Forwarding
+port map(
+	reg_rs_ex => reg_rs_ex_forwarding_s,
+	reg_rt_ex => reg_rt_ex_forwarding_s,
+	reg_rd_mem => reg_rd_mem_forwarding_s,
+	reg_rd_wb => reg_rd_wb_forwarding_s,
+	reg_wen_mem => reg_wen_mem_forwarding_s,
+	reg_wen_wb => reg_wen_wb_forwarding_s,
+	data_1_forward_mem => data_1_forward_mem_forwarding_s,
+	data_2_forward_mem => data_2_forward_mem_forwarding_s,
+	data_1_forward_wb => data_1_forward_wb_forwarding_s,
+	data_2_forward_wb => data_2_forward_wb_forwarding_s
+
+);
 	
-	--Memory signals
-	writedata => MEMwritedata,
-	address => MEMaddress,
-	memwrite => MEMmemwrite,
-	memread  => MEMmemread,
-	readdata => MEMreaddata,
-	waitrequest => MEMwaitrequest
-);
-
-memMemory: memory
-port map (
-	clock => clk,
-	writedata => MEMwritedata,
-	address => MEMaddress,
-	memwrite => MEMmemwrite,
-	memread  => MEMmemread,
-	writeToText => writeToMemoryFile,
-	readdata => MEMreaddata,
-	waitrequest => MEMwaitrequest
-);
-
-wbStage: wb
-port map (ctrl_memtoreg_in => memtoReg,
-	ctrl_regwrite_in => regWrite,
-	ctrl_regwrite_out => write_enable,
 	
-	alu_in  => MEMWBaluOutput,
-	mem_in => MEMWBmemOutput,
-	mux_out  => rd_data,
-	write_addr_in => MEMWBrd,
-	write_addr_out => WBrd
+MEM； Memory
+port map(
+	clk => clk,
+	mem_write_in => mem_write_in_MEM_s,
+	mem_data_write => mem_data_write_MEM_s,
+	mem_read_in => mem_read_in_MEM_s,
+	alu_in => alu_in_MEM_s,
+	reg_write_in => reg_write_in_MEM_s,
+	mem_to_reg_in => mem_to_reg_in_MEM_s,
+	reg_write_out => reg_write_out_MEM_s,
+	mem_to_reg_out => mem_to_reg_out_MEM_s,
+	read_data => read_data_MEM_s,
+	alu_out => alu_out_MEM_s
 );
+
+
+
+
+WB: WriteBack
+port map(
+	clk => clk,
+	reg_write_in => reg_write_in_wb_s,
+	mem_to_reg_in => mem_to_reg_in_wb_s,
+	read_data => read_data_wb_s,
+	alu_in => alu_in_wb_s,
+	reg_to_write_in => reg_to_write_in_wb_s,
+	mem_to_reg_out => mem_to_reg_out_wb_s,
+	write_data => write_data_wb_s,
+	reg_to_write_out => reg_to_write_out_wb_s
+);
+
+
+
+
+
+HD: hazard_detection
+port map(
+	reg_rt_ex => reg_rt_ex_hazard_s,
+	reg_rs_id => reg_rs_id_hazard_s,
+	reg_rt_id => reg_rt_id_hazard_s,
+	insert_stall_mux => insert_stall_mux_hazard_s,
+	if_id_write => if_id_write_hazard_s
+);
+
+
+
 
 process(EXMEMStructuralStall)
 begin
