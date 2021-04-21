@@ -16,157 +16,134 @@ writeToMemoryFile : in std_logic := '0'
 end cpuPipeline;
 
 architecture cpuPipeline_arch of cpuPipeline is
-
-component instructionFetchStage IS
-	port(
-		clk : in std_logic;
-		muxInput0 : in std_logic_vector(31 downto 0);
-		selectInputs : in std_logic;
-		four : in INTEGER;
-		structuralStall : IN STD_LOGIC;
-		pcStall : IN STD_LOGIC;
-
-		selectOutput : out std_logic_vector(31 downto 0);
-		instructionMemoryOutput : out std_logic_vector(31 downto 0)
-		);
-		
-	end component;
-		
-component controller is
-	port(clk : in std_logic;
-		 opcode : in std_logic_vector(5 downto 0);
-		 funct : in std_logic_vector(5 downto 0);
-		 branch: in std_logic;
-		 oldBranch: in std_logic;
-		 ALU1src : out STD_LOGIC;
-		 ALU2src : out STD_LOGIC;
-		 MemRead : out STD_LOGIC;
-		 MemWrite : out STD_LOGIC;
-		 RegWrite : out STD_LOGIC;
-		 MemToReg : out STD_LOGIC;
-		 RType : out std_logic;
-		 JType : out std_logic;
-		 Shift : out std_logic;
-		 structuralStall : out std_logic;
-		 ALUOp : out STD_LOGIC_VECTOR(4 downto 0)
-		 );
-end component;
-
-component register_file is
-
-PORT(
-		
-		clock: IN STD_LOGIC;
-		rs: IN STD_LOGIC_VECTOR (4 downto 0);
-		rt: IN STD_LOGIC_VECTOR (4 downto 0);
-		write_enable: IN STD_LOGIC; 
-		rd: IN STD_LOGIC_VECTOR (4 downto 0);
-		rd_data: IN STD_LOGIC_VECTOR (31 downto 0); 
-		writeToText : IN STD_LOGIC := '0';
-
-		ra_data: OUT STD_LOGIC_VECTOR (31 downto 0);
-		rb_data: OUT STD_LOGIC_VECTOR (31 downto 0) 
-	);
-
-end component;
-
-
-component signextender is 
-	PORT (
-        immediate_in: IN STD_LOGIC_VECTOR (15 DOWNTO 0);
-        immediate_out: OUT STD_LOGIC_VECTOR (31 DOWNTO 0)
-    );
-end component;
-	
-component mux is
-port(
-	 input0 : in std_logic_vector(31 downto 0);
-	 input1 : in std_logic_vector(31 downto 0);
-	 selectInput : in std_logic;
-	 selectOutput : out std_logic_vector(31 downto 0)
-	 );
-	 	
-	
-end component;
-
-component alu is
- Port ( input_a : in STD_LOGIC_VECTOR (31 downto 0);
- input_b : in STD_LOGIC_VECTOR (31 downto 0);
- SEL : in STD_LOGIC_VECTOR (4 downto 0);
- out_alu : out STD_LOGIC_VECTOR(31 downto 0));
-end component;
-
-component zero is
-port (input_a : in std_logic_vector (31 downto 0);
-	input_b : in std_logic_vector (31 downto 0);
-	optype : in std_logic_vector (4 downto 0);
-	result: out std_logic
-  );
-end component;
-
---MEMORY OBJ FOR MEM STAGE
-COMPONENT memory IS
-	GENERIC(
-		ram_size : INTEGER := 8192;
-		mem_delay : time := 10 ns;
-		clock_period : time := 1 ns
-	);
-	PORT (
-		clock: IN STD_LOGIC;
-		writedata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+	component instruction_memory IS
+		PORT (
+		clk: IN STD_LOGIC;
+		memread : IN STD_LOGIC;
 		address: IN INTEGER RANGE 0 TO ram_size-1;
-		memwrite: IN STD_LOGIC := '0';
-		memread: IN STD_LOGIC := '0';
-		writeToText : IN STD_LOGIC := '0';
-		
 		readdata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 		waitrequest: OUT STD_LOGIC
 	);
-END COMPONENT;
+	end component; 
+	
+	component fetch IS
+		port(
+		clk : in std_logic;
+		fetch_out : out std_logic_vector(31 downto 0);					-- feched out data
+		pc_out : out integer;													-- @TODO: not impemented? 
+		pc_in : in integer;														-- external pc 
+		pc_src : in std_logic;  												-- source of next_pc, pc+1 (0) or external pc (1)
+		pc_stall : in std_logic;  												-- whether pc needs to be stalled (1) or not (0)
+		reset : in std_logic
+	);
+	end component; 
+		
+	
+	
+	component decode IS
+		PORT (
+		clk : in std_logic;
+		instruction : in std_logic_vector(31 downto 0);  	-- fetched instruction
+		wb_data : in std_logic_vector(31 downto 0);  	 	-- data to write back to register
+		wb_reg : in std_logic_vector(4 downto 0);  			-- the register to write back to
+		wb : in std_logic;  											-- whether a write back is required (1) or not (0)
+		pc_in : in integer;  										-- incremented pc (pc+1) from fetch stage
+		
+		pc_target : out integer;  									-- target pc for branch or jump
+		read_data_1 : out std_logic_vector(31 downto 0);
+		read_data_2 : out std_logic_vector(31 downto 0);
+		rt_data : out std_logic_vector(31 downto 0);			-- when sw this signal contains the value stored in rt
+		rt_out : out std_logic_vector(4 downto 0);			-- source register 
+		rs_out : out std_logic_vector(4 downto 0);			-- source register
+		rd_out : out std_logic_vector(4 downto 0);			-- destination register
+		branch : out std_logic;  									-- branch or jump (1) or not (0)
+		
+		-- EX stage control signals
+		alu_op : out integer range 0 to 26;  					-- ALU operation
+		reg_dst : out std_logic;  									-- selecting whether rt (0) or rd (1) is the destination register
+		
+		-- M stage control signals
+		mem_write : out std_logic;  								-- whether write to memory is needed (1) or not (0)
+		mem_read : out std_logic;  								-- whether read from memory is needed (1) or not (0)
+		
+		-- WB stage control signals
+		reg_write : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+		mem_to_reg : out std_logic  								-- selecting whether writeback data is read from memory (1) or from ALU result (0)
+		
+	);
+	end component;
+	
 
---MEM STAGE
-component mem is  
-port (clk: in std_logic;
-	-- Control lines
-	ctrl_write : in std_logic;
-	ctrl_read: in std_logic;
-	ctrl_memtoreg_in: in std_logic;
-	ctrl_memtoreg_out: out std_logic;
-	ctrl_regwrite_in: in std_logic;
-	ctrl_regwrite_out: out std_logic;
-	ctrl_jal: in std_logic;
+	component Forwarding IS
+		port
+        ( reg_rs_ex : in std_logic_vector(4 downto 0)
+        ; reg_rt_ex : in std_logic_vector(4 downto 0)
+        ; reg_rd_mem  : in std_logic_vector(4 downto 0)
+        ; reg_rd_wb   : in std_logic_vector(4 downto 0)
+        ; reg_wen_mem       : in  std_logic
+        ; reg_wen_wb        : in  std_logic
 
-	--Ports of stage
-	alu_in : in std_logic_vector (31 downto 0);
-	alu_out : out std_logic_vector (31 downto 0);
-	mem_data_in: in std_logic_vector (31 downto 0);
-	mem_data_out: out std_logic_vector (31 downto 0);
-	write_addr_in: in std_logic_vector (4 downto 0);
-	write_addr_out: out std_logic_vector (4 downto 0);
+		  
+		  ; data_1_forward_mem : out std_logic_vector(1 downto 0)
+		  ; data_2_forward_mem : out std_logic_vector(1 downto 0)
+		  ; data_1_forward_wb : out std_logic_vector(1 downto 0)
+		  ; data_2_forward_wb : out std_logic_vector(1 downto 0)
+        );
+	end component; 
+		
 	
-	--Memory signals
-	writedata: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
-	address: OUT INTEGER RANGE 0 TO 32768 -1;
-	memwrite: OUT STD_LOGIC := '0';
-	memread: OUT STD_LOGIC := '0';
-	readdata: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
-	waitrequest: IN STD_LOGIC
 	
-  );
-end component;
- 
-component wb is
-port (ctrl_memtoreg_in: in std_logic;
-	ctrl_regwrite_in: in std_logic;
-	ctrl_regwrite_out: out std_logic;
+	component Memory IS
+		port(
+		clk: in std_logic;
+		mem_write_in : in std_logic;  								-- whether write to memory is needed (1) or not (0)
+		mem_data_write : in std_logic_vector(31 downto 0); 	-- data write into the memory
+		mem_read_in : in std_logic;  									-- whether read from memory is needed (1) or not (0)
+		alu_in : in std_logic_vector (31 downto 0); 				-- address that we want to read/write
+		
+		-- control signals propogated to the next stage
+		reg_write_in : in std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+		mem_to_reg_in : in std_logic; 								-- selecting whether writeback data is read
+		
+
+		reg_write_out : out std_logic;  								-- signal indicating whether a write to register is needed (1) or not (0)
+		mem_to_reg_out : out std_logic; 								-- selecting whether writeback data is read
+		
+		read_data : out std_logic_vector(31 downto 0);
+		alu_out : out std_logic_vector (31 downto 0)
+	);
+	end component; 
 	
-	alu_in : in std_logic_vector (31 downto 0);
-	mem_in: in std_logic_vector (31 downto 0);
-	mux_out : out std_logic_vector (31 downto 0);
-	write_addr_in: in std_logic_vector (4 downto 0);
-	write_addr_out: out std_logic_vector (4 downto 0)
-);
- end component;
+	
+	component WriteBack IS
+		port(
+		clk:				in std_logic;
+		reg_write_in:			in std_logic;
+		mem_to_reg_in:			in std_logic;
+		read_data:		in std_logic_vector(31 downto 0);
+		alu_in:		in std_logic_vector(31 downto 0);
+		reg_to_write_in: in std_logic_vector(4 downto 0); -- which register to write to
+		
+		mem_to_reg_out:	out std_logic;
+		write_data:			out std_logic_vector(31 downto 0);
+		reg_to_write_out: out std_logic_vector(4 downto 0) -- pass to the decode stage
+	);
+	end component; 
+	
+	
+	component hazard_detection IS
+		 port ( mem_read_ex : in  std_logic
+         ; reg_rt_ex   : in std_logic_vector(4 downto 0)
+         ; reg_rs_id   : in std_logic_vector(4 downto 0)
+         ; reg_rt_id   : in std_logic_vector(4 downto 0)
+         ; insert_stall_mux: out  std_logic
+			; if_id_write : out std_logic 
+        );
+	end component; 
+	
+	
+	
+
 
  
  -- STALL SIGNALS 
@@ -454,6 +431,7 @@ else
 	EXMEMregisterOutput <= IDEXrb;
 	ctrl_jal <= '0';
 end if;
+	
 	
 end if ;
 end process;
