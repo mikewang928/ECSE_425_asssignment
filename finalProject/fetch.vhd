@@ -51,6 +51,8 @@ begin
 		-- increament pc every clock cycle (when pc_stall = '1' no increament)
 			if rising_edge(clk) and pc_stall = '0' then
 				pc <= next_pc;
+			else
+				pc <= pc;
 			end if;
 			
 		end if;
@@ -62,11 +64,7 @@ begin
 		if reset = '1' then
 			fetch_out <= "00000000000000000000000000100000"; -- add r0,r0,r0 instruction
 		else
-			if rising_edge(pc_stall) or pc_stall = '1' then
-				fetch_out <= "00000000000000000000000000100000"; -- add r0,r0,r0 instruction
-			else
-				fetch_out <= s_readdata;
-			end if;
+			fetch_out <= s_readdata;
 		end if;
 	end process;
 	

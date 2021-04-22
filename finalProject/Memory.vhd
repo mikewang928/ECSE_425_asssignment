@@ -32,7 +32,7 @@ end entity;
 
 architecture arch of Memory is
 	TYPE MEM IS ARRAY(ram_size-1 downto 0) OF STD_LOGIC_VECTOR(31 DOWNTO 0);
-	SIGNAL memory_block: MEM;
+	SIGNAL memory_block: MEM := (others=>(others=>'0'));
 	
 begin
 	
