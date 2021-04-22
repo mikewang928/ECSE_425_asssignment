@@ -134,25 +134,26 @@ begin
 						special_register_bank(0) <= mux_mult_out(31 downto 0); --LO
 						special_register_bank(1) <= mux_mult_out(63 downto 32); --HI
 					
+					
 					when 4 => -- div
 						div_main := std_logic_vector(signed(mux_output_1) / signed(mux_output_2)); -- 32 bits
-						mux_mult_div_out := std_logic_vector(signed(div_main)*signed(mux_output_2));
-						div_remainder := std_logic_vector(signed(mux_output_1) - signed(mux_mult_div_out))(31 downto 0); --64 bits 
-						special_register_bank(0) <= div_main;
-						special_register_bank(1) <= div_remainder;
+
+						div_remainder := std_logic_vector(signed(mux_output_1) mod signed(mux_output_2));
+						special_register_bank(0) <= div_main; --LO
+						special_register_bank(1) <= div_remainder; --HI
 						
 					when 5 => -- slt (op1<op2:1; op1>op2:0)
-						if signed(mux_output_1) > signed(mux_output_2) then
-							alu_out <= x"00000000";
-						else 
+						if signed(mux_output_1) < signed(mux_output_2) then
 							alu_out <= x"00000001";
+						else
+							alu_out <= x"00000000";
 						end if;
 						
 					when 6 => -- slt (op1<op2:1; op1>op2:0)
-						if signed(mux_output_1) > signed(mux_output_2) then
-							alu_out <= x"00000000";
-						else 
+						if signed(mux_output_1) < signed(mux_output_2) then
 							alu_out <= x"00000001";
+						else 
+							alu_out <= x"00000000";
 						end if;
 						
 					when 7 => -- and 
@@ -180,18 +181,14 @@ begin
 						alu_out <= mux_output_2(15 downto 0) & x"0000";
 						
 					when 17 => -- sll (shift left logical)
-						alu_out <= std_logic_vector(shift_left(signed(mux_output_1), to_integer(signed(mux_output_2))));
+						alu_out <= std_logic_vector(shift_left(unsigned(mux_output_1), to_integer(unsigned(mux_output_2))));
 						
-					-- 1001 -> 0001/ 1111
+					
 					when 18 => -- srl	(shift right logical)
-						ZERO := x"00000000";
-						mux_output_2 := x"00000000"; -- this line is only to allow the program to compile, when running the pipeline or testing remove this line!!!
-						shifted_bits := to_integer(signed(mux_output_2));
-						report("shifted_bits: " & integer'image(shifted_bits));
-						alu_out <= std_logic_vector(ZERO + signed(mux_output_1)(31 downto shifted_bits)); -- in order to compile mux_output_2 (decode_data_2) must have some value 
+						alu_out <= std_logic_vector(shift_right(unsigned(mux_output_1), to_integer(unsigned(mux_output_2))));
 					
 					when 19 => -- sra (shift right arthemic)
-						alu_out <= std_logic_vector(shift_right(signed(mux_output_1), to_integer(signed(mux_output_2))));
+						alu_out <= std_logic_vector(shift_right(signed(mux_output_1), to_integer(unsigned(mux_output_2))));
 						
 					when 20 => -- lw (load word)
 						alu_out <= std_logic_vector(signed(mux_output_1) + signed(mux_output_2)); -- alu_out is the memory address

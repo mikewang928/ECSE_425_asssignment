@@ -14,6 +14,7 @@ ENTITY decode IS
 		wb_reg : in std_logic_vector(4 downto 0);  			-- the register to write back to
 		wb : in std_logic;  											-- whether a write back is required (1) or not (0)
 		pc_in : in integer;  										-- incremented pc (pc+1) from fetch stage
+		insert_stall_mux : in std_logic;					-- set all control signals to 0
 		
 		pc_target : out integer;  									-- target pc for branch or jump
 		read_data_1 : out std_logic_vector(31 downto 0);
@@ -254,8 +255,15 @@ BEGIN
 			when others =>
 				
 			end case;
-				
 		
+			-- if the pipeline is to be stalled then set all control signals to 0
+			if insert_stall_mux = '1' then
+				mem_read <= '0';
+				mem_write <= '0';
+				reg_dst <= '0';
+				reg_write <= '0';
+				mem_to_reg <= '0';
+			end if;
 		
 		-- write back to register		
 		elsif falling_edge(clk) then  

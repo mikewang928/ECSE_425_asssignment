@@ -29,8 +29,8 @@ begin
   process (mem_read_ex, reg_rt_ex, reg_rs_id, reg_rt_id) 
   begin 
     insert_stall_mux <= '0';
-    
-    --Check for hazard
+	 
+    --Check for hazard (RAW hazard read instruction register immed after write register)
     if mem_read_ex = '1' then
       if reg_rt_ex = reg_rs_id or reg_rt_ex = reg_rt_id then
         --HAZARD. Time to stall
