@@ -1,0 +1,1 @@
+run the tcl file for each independent stage
